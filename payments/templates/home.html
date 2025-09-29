@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy a Coffee - Rock Mode! 🎸</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a0000 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ff0000;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        #payment-form {
+            margin: 20px 0;
+        }
+        
+        input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input[type="email"]:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            transform: scale(1.02);
+        }
+        
+        input[type="email"]::placeholder {
+            color: #888;
+        }
+        
+        #card-element {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #ff0000;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+        
+        #card-element:hover {
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #ff0000, #cc0000);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #cc0000, #990000);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 0, 0, 0.5);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        #message.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .guitar {
+            text-align: center;
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: rock 1s infinite;
+        }
+        
+        @keyframes rock {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+        
+        .price {
+            text-align: center;
+            font-size: 2em;
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="guitar">🎸</div>
+        <h1>ROCK YOUR PAYMENT!</h1>
+        <p class="subtitle">Support the band with a coffee ☕</p>
+        <div class="price">💰 $5.00 💰</div>
+        
+        <form id="payment-form">
+            <input 
+                type="email" 
+                id="email" 
+                placeholder="🤘 Your Email Address"
+                required
+            >
+            
+            <div id="card-element"></div>
+            
+            <button type="submit" id="submit-button">
+                🎸 PAY NOW & ROCK! 🎸
+            </button>
+        </form>
+        
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // Initialize Stripe
+        const stripe = Stripe('{{ stripe_public_key }}');
+        const elements = stripe.elements();
+        
+        // Style for card element
+        const style = {
+            base: {
+                color: '#fff',
+                fontSize: '16px',
+                '::placeholder': {
+                    color: '#888',
+                }
+            },
+            invalid: {
+                color: '#ff0000',
+            }
+        };
+        
+        const cardElement = elements.create('card', { style: style });
+        cardElement.mount('#card-element');
+
+        const form = document.getElementById('payment-form');
+        const submitButton = document.getElementById('submit-button');
+        const messageDiv = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitButton.disabled = true;
+            submitButton.textContent = '🎵 PROCESSING... 🎵';
+            messageDiv.classList.remove('show');
+
+            const email = document.getElementById('email').value;
+
+            try {
+                // Create Payment Intent
+                const response = await fetch('/create-payment-intent/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const { clientSecret, error } = await response.json();
+                
+                if (error) {
+                    throw new Error(error);
+                }
+
+                // Confirm payment
+                const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+                    clientSecret,
+                    {
+                        payment_method: {
+                            card: cardElement,
+                            billing_details: { email: email }
+                        }
+                    }
+                );
+
+                if (stripeError) {
+                    messageDiv.textContent = '💥 ' + stripeError.message;
+                    messageDiv.className = 'error show';
+                } else if (paymentIntent.status === 'succeeded') {
+                    messageDiv.textContent = '🎸 PAYMENT ROCKS! THANK YOU! 🎸';
+                    messageDiv.className = 'success show';
+                    form.reset();
+                    cardElement.clear();
+                }
+            } catch (err) {
+                messageDiv.textContent = '💥 Something went wrong! Try again!';
+                messageDiv.className = 'error show';
+            }
+
+            submitButton.disabled = false;
+            submitButton.textContent = '🎸 PAY NOW & ROCK! 🎸';
+        });
+    </script>
+</body>
+</html>

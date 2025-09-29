@@ -15,7 +15,7 @@ def home(request):
     }
     return render(request, 'home.html', context)
 
-
+@csrf_exempt 
 def create_payment_intent(request):
     """Create a Payment Intent for $5"""
     if request.method == 'POST':
