@@ -1,0 +1,42 @@
+# Virtual Environment
+django-stripe-env/
+venv/
+env/
+ENV/
+*.venv
+
+# Environment variables (CRITICAL - contains Stripe secret keys!)
+.env
+.env.local
+.env.*.local
+
+# Python
+*.py[cod]
+*$py.class
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+*.pot
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
